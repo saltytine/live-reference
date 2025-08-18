@@ -109,9 +109,53 @@ function! s:IsIgnoredWord(word)
     return 0
 endfunction
 
+function! s:IsInComment()
+    let synstack = synstack(line('.'), col('.'))
+    if empty(synstack)
+        return 0
+    endif
+    
+    for syn_id in synstack
+        let syn_name = synIDattr(syn_id, 'name')
+        if syn_name =~? 'comment\|todo\|fixme\|note\|hack\|xxx'
+            return 1
+        endif
+    endfor
+    
+    return 0
+endfunction
+
 function! s:GetWordUnderCursor()
+    if s:IsInComment()
+        return ''
+    endif
+    
     let word = expand('<cword>')
     if len(word) < g:live_refs_min_word_len || word !~ '\w'
+        return ''
+    endif
+    
+    let line = getline('.')
+    let col = col('.') - 1
+    
+    let word_start = match(line, '\<' . escape(word, '\/.*$^~[]') . '\>', col)
+    if word_start == -1
+        let word_start = match(line, '\<' . escape(word, '\/.*$^~[]') . '\>')
+        while word_start != -1 && word_start <= col
+            let word_end = word_start + len(word) - 1
+            if col >= word_start && col <= word_end
+                break
+            endif
+            let word_start = match(line, '\<' . escape(word, '\/.*$^~[]') . '\>', word_start + 1)
+        endwhile
+    endif
+    
+    if word_start != -1
+        let word_end = word_start + len(word) - 1
+        if col < word_start || col > word_end
+            return ''
+        endif
+    else
         return ''
     endif
     
