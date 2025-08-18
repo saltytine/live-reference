@@ -6,22 +6,22 @@ let g:loaded_live_refs = 1
 let g:live_refs_enabled = get(g:, 'live_refs_enabled', 1)
 let g:live_refs_min_word_len = get(g:, 'live_refs_min_word_len', 3)
 let g:live_refs_max_results = get(g:, 'live_refs_max_results', 10)
-let g:live_refs_updatetime = get(g:, 'live_refs_updatetime', 500)
+let g:live_refs_updatetime = get(g:, 'live_refs_updatetime', 700)
 
 if g:live_refs_enabled && &updatetime > g:live_refs_updatetime
     let &updatetime = g:live_refs_updatetime
 endif
 
-let s:common_keywords = {
+let s:keywords = {
     \ 'python': ['def', 'class', 'if', 'else', 'elif', 'for', 'while', 'try', 'except', 'finally', 'with', 'as', 'import', 'from', 'return', 'yield', 'break', 'continue', 'pass', 'and', 'or', 'not', 'in', 'is', 'None', 'True', 'False', 'len', 'str', 'int', 'float', 'list', 'dict', 'set', 'tuple', 'range', 'enumerate', 'zip', 'print', 'input', 'open', 'close', 'read', 'write', 'split', 'join', 'strip', 'replace', 'find', 'get', 'pop', 'append', 'extend', 'insert', 'remove', 'sort', 'reverse', 'lambda', 'global', 'nonlocal', 'assert', 'del', 'exec', 'eval'],
     \ 'javascript': ['function', 'var', 'let', 'const', 'if', 'else', 'for', 'while', 'do', 'switch', 'case', 'default', 'break', 'continue', 'return', 'try', 'catch', 'finally', 'throw', 'new', 'this', 'typeof', 'instanceof', 'in', 'of', 'true', 'false', 'null', 'undefined', 'console', 'log', 'length', 'push', 'pop', 'shift', 'unshift', 'slice', 'splice', 'indexOf', 'includes', 'forEach', 'map', 'filter', 'reduce', 'find', 'some', 'every', 'async', 'await', 'class', 'extends', 'super', 'static', 'import', 'export', 'from', 'default', 'delete', 'void'],
     \ 'typescript': ['function', 'var', 'let', 'const', 'if', 'else', 'for', 'while', 'do', 'switch', 'case', 'default', 'break', 'continue', 'return', 'try', 'catch', 'finally', 'throw', 'new', 'this', 'typeof', 'instanceof', 'in', 'of', 'true', 'false', 'null', 'undefined', 'console', 'log', 'length', 'async', 'await', 'class', 'extends', 'super', 'static', 'import', 'export', 'from', 'default', 'delete', 'void', 'interface', 'type', 'enum', 'namespace', 'module', 'declare', 'abstract', 'implements', 'private', 'protected', 'public', 'readonly', 'string', 'number', 'boolean', 'any', 'unknown', 'never', 'object'],
     \ 'c': ['int', 'char', 'float', 'double', 'void', 'short', 'long', 'signed', 'unsigned', 'if', 'else', 'for', 'while', 'do', 'switch', 'case', 'default', 'break', 'continue', 'return', 'sizeof', 'typedef', 'struct', 'union', 'enum', 'const', 'static', 'extern', 'auto', 'register', 'volatile', 'goto', 'NULL', 'true', 'false', 'malloc', 'calloc', 'realloc', 'free', 'printf', 'scanf', 'fprintf', 'sprintf', 'strlen', 'strcpy', 'strcmp', 'strcat', 'strncpy', 'strncmp', 'strncat', 'memcpy', 'memset', 'memcmp', 'fopen', 'fclose', 'fread', 'fwrite', 'fgets', 'fputs', 'fgetc', 'fputc', 'include', 'define', 'ifdef', 'ifndef', 'endif', 'pragma'],
-    \ 'cpp': ['int', 'char', 'float', 'double', 'bool', 'void', 'short', 'long', 'signed', 'unsigned', 'wchar_t', 'class', 'struct', 'public', 'private', 'protected', 'virtual', 'override', 'final', 'friend', 'operator', 'if', 'else', 'for', 'while', 'do', 'switch', 'case', 'default', 'break', 'continue', 'return', 'try', 'catch', 'throw', 'new', 'delete', 'this', 'nullptr', 'true', 'false', 'const', 'static', 'extern', 'inline', 'mutable', 'explicit', 'template', 'typename', 'namespace', 'using', 'std', 'cout', 'cin', 'cerr', 'clog', 'endl', 'vector', 'string', 'map', 'unordered_map', 'set', 'unordered_set', 'list', 'deque', 'queue', 'priority_queue', 'stack', 'pair', 'tuple', 'array', 'shared_ptr', 'unique_ptr', 'weak_ptr', 'make_shared', 'make_unique', 'make_pair', 'make_tuple', 'size', 'empty', 'begin', 'end', 'rbegin', 'rend', 'push_back', 'pop_back', 'push_front', 'pop_front', 'insert', 'erase', 'clear', 'find', 'count', 'lower_bound', 'upper_bound', 'sort', 'reverse', 'swap', 'move', 'forward', 'get', 'first', 'second', 'auto', 'decltype', 'constexpr', 'noexcept', 'thread_local'],
-    \ 'java': ['class', 'interface', 'extends', 'implements', 'enum', 'package', 'import', 'public', 'private', 'protected', 'static', 'final', 'abstract', 'synchronized', 'volatile', 'transient', 'native', 'strictfp', 'if', 'else', 'for', 'while', 'do', 'switch', 'case', 'default', 'break', 'continue', 'return', 'try', 'catch', 'finally', 'throw', 'throws', 'new', 'this', 'super', 'null', 'true', 'false', 'instanceof', 'int', 'char', 'float', 'double', 'boolean', 'byte', 'short', 'long', 'void', 'String', 'Object', 'Integer', 'Double', 'Boolean', 'Character', 'Long', 'Short', 'Byte', 'Float', 'System', 'out', 'err', 'in', 'println', 'print', 'printf', 'length', 'size', 'get', 'set', 'add', 'remove', 'contains', 'isEmpty', 'clear', 'toString', 'equals', 'hashCode', 'clone', 'wait', 'notify', 'notifyAll', 'getClass', 'List', 'ArrayList', 'LinkedList', 'Map', 'HashMap', 'TreeMap', 'Set', 'HashSet', 'TreeSet', 'Collection', 'Iterator'],
+    \ 'cpp': ['int', 'char', 'float', 'double', 'bool', 'void', 'short', 'long', 'signed', 'unsigned', 'wchar_t', 'class', 'struct', 'public', 'private', 'protected', 'virtual', 'override', 'final', 'friend', 'operator', 'if', 'else', 'for', 'while', 'do', 'switch', 'case', 'default', 'break', 'continue', 'return', 'try', 'catch', 'throw', 'new', 'delete', 'this', 'nullptr', 'true', 'false', 'const', 'static', 'extern', 'inline', 'mutable', 'explicit', 'template', 'typename', 'namespace', 'using', 'std', 'cout', 'cin', 'cerr', 'clog', 'endl', 'size', 'empty', 'begin', 'end', 'rbegin', 'rend', 'push_back', 'pop_back', 'push_front', 'pop_front', 'insert', 'erase', 'clear', 'find', 'count', 'lower_bound', 'upper_bound', 'sort', 'reverse', 'swap', 'move', 'forward', 'get', 'first', 'second', 'auto', 'decltype', 'constexpr', 'noexcept', 'thread_local'],
+    \ 'java': ['class', 'interface', 'extends', 'implements', 'enum', 'package', 'import', 'public', 'private', 'protected', 'static', 'final', 'abstract', 'synchronized', 'volatile', 'transient', 'native', 'strictfp', 'if', 'else', 'for', 'while', 'do', 'switch', 'case', 'default', 'break', 'continue', 'return', 'try', 'catch', 'finally', 'throw', 'throws', 'new', 'this', 'super', 'null', 'true', 'false', 'instanceof', 'int', 'char', 'float', 'double', 'boolean', 'byte', 'short', 'long', 'void', 'String', 'Object', 'Integer', 'Double', 'Boolean', 'Character', 'Long', 'Short', 'Byte', 'Float', 'System', 'out', 'err', 'in', 'println', 'print', 'printf', 'length', 'size', 'get', 'set', 'add', 'remove', 'contains', 'isEmpty', 'clear', 'toString', 'equals', 'hashCode', 'clone', 'wait', 'notify', 'notifyAll', 'getClass'],
     \ 'go': ['func', 'var', 'const', 'type', 'struct', 'interface', 'map', 'slice', 'array', 'chan', 'package', 'import', 'if', 'else', 'for', 'range', 'switch', 'case', 'default', 'break', 'continue', 'fallthrough', 'return', 'go', 'defer', 'select', 'make', 'new', 'len', 'cap', 'append', 'copy', 'delete', 'close', 'panic', 'recover', 'print', 'println', 'true', 'false', 'nil', 'iota', 'int', 'int8', 'int16', 'int32', 'int64', 'uint', 'uint8', 'uint16', 'uint32', 'uint64', 'uintptr', 'float32', 'float64', 'complex64', 'complex128', 'byte', 'rune', 'string', 'bool', 'error', 'fmt', 'Printf', 'Println', 'Sprintf', 'Errorf', 'os', 'io', 'bufio', 'strings', 'strconv', 'time', 'log', 'http', 'json', 'context', 'sync', 'atomic'],
-    \ 'rust': ['fn', 'let', 'mut', 'const', 'static', 'struct', 'enum', 'impl', 'trait', 'type', 'use', 'mod', 'pub', 'crate', 'super', 'self', 'Self', 'if', 'else', 'match', 'for', 'while', 'loop', 'break', 'continue', 'return', 'yield', 'move', 'ref', 'where', 'as', 'unsafe', 'extern', 'true', 'false', 'Some', 'None', 'Ok', 'Err', 'Option', 'Result', 'Vec', 'HashMap', 'HashSet', 'BTreeMap', 'BTreeSet', 'String', 'str', 'i8', 'i16', 'i32', 'i64', 'i128', 'isize', 'u8', 'u16', 'u32', 'u64', 'u128', 'usize', 'f32', 'f64', 'bool', 'char', 'Box', 'Rc', 'Arc', 'RefCell', 'Mutex', 'RwLock', 'Clone', 'Copy', 'Debug', 'Display', 'Drop', 'Default', 'PartialEq', 'Eq', 'PartialOrd', 'Ord', 'Hash', 'Iterator', 'IntoIterator', 'FromIterator', 'Collect', 'len', 'is_empty', 'push', 'pop', 'insert', 'remove', 'get', 'contains', 'iter', 'into_iter', 'map', 'filter', 'fold', 'reduce', 'collect', 'unwrap', 'expect', 'panic', 'println', 'print', 'dbg', 'todo', 'unimplemented', 'unreachable'],
-    \ 'swift': ['func', 'var', 'let', 'class', 'struct', 'enum', 'protocol', 'extension', 'import', 'public', 'private', 'internal', 'fileprivate', 'open', 'static', 'final', 'override', 'required', 'convenience', 'lazy', 'weak', 'unowned', 'if', 'else', 'guard', 'switch', 'case', 'default', 'for', 'while', 'repeat', 'break', 'continue', 'fallthrough', 'return', 'throw', 'throws', 'rethrows', 'try', 'catch', 'defer', 'do', 'in', 'is', 'as', 'super', 'self', 'Self', 'init', 'deinit', 'subscript', 'willSet', 'didSet', 'get', 'set', 'mutating', 'nonmutating', 'dynamic', 'optional', 'required', 'true', 'false', 'nil', 'Any', 'AnyObject', 'Type', 'String', 'Int', 'Double', 'Float', 'Bool', 'Character', 'Array', 'Dictionary', 'Set', 'Optional', 'Result', 'Error', 'Data', 'URL', 'Date', 'UUID', 'print', 'debugPrint', 'dump', 'fatalError', 'precondition', 'assert', 'count', 'isEmpty', 'first', 'last', 'append', 'insert', 'remove', 'removeAll', 'contains', 'map', 'filter', 'reduce', 'forEach', 'compactMap', 'flatMap', 'sorted', 'reversed'],
+    \ 'rust': ['fn', 'let', 'mut', 'const', 'static', 'struct', 'enum', 'impl', 'trait', 'type', 'use', 'mod', 'pub', 'crate', 'super', 'self', 'Self', 'if', 'else', 'match', 'for', 'while', 'loop', 'break', 'continue', 'return', 'yield', 'move', 'ref', 'where', 'as', 'unsafe', 'extern', 'true', 'false', 'Some', 'None', 'Ok', 'Err', 'Option', 'Result', 'Vec', 'HashMap', 'HashSet', 'BTreeMap', 'BTreeSet', 'String', 'str', 'i8', 'i16', 'i32', 'i64', 'i128', 'isize', 'u8', 'u16', 'u32', 'u64', 'u128', 'usize', 'f32', 'f64', 'bool', 'char', 'Box', 'Rc', 'Arc', 'RefCell', 'Mutex', 'RwLock', 'len', 'is_empty', 'push', 'pop', 'insert', 'remove', 'get', 'contains', 'iter', 'into_iter', 'map', 'filter', 'fold', 'reduce', 'collect', 'unwrap', 'expect', 'panic', 'println', 'print', 'dbg', 'todo', 'unimplemented', 'unreachable'],
+    \ 'swift': ['func', 'var', 'let', 'class', 'struct', 'enum', 'protocol', 'extension', 'import', 'public', 'private', 'internal', 'fileprivate', 'open', 'static', 'final', 'override', 'required', 'convenience', 'lazy', 'weak', 'unowned', 'if', 'else', 'guard', 'switch', 'case', 'default', 'for', 'while', 'repeat', 'break', 'continue', 'fallthrough', 'return', 'throw', 'throws', 'rethrows', 'try', 'catch', 'defer', 'do', 'in', 'is', 'as', 'super', 'self', 'Self', 'init', 'deinit', 'subscript', 'willSet', 'didSet', 'get', 'set', 'mutating', 'nonmutating', 'dynamic', 'optional', 'required', 'true', 'false', 'nil', 'Any', 'AnyObject', 'Type', 'String', 'Int', 'Double', 'Float', 'Bool', 'Character', 'print', 'debugPrint', 'dump', 'fatalError', 'precondition', 'assert', 'count', 'isEmpty', 'first', 'last', 'append', 'insert', 'remove', 'removeAll', 'contains', 'map', 'filter', 'reduce', 'forEach', 'compactMap', 'flatMap', 'sorted', 'reversed'],
     \ 'vim': ['function', 'endfunction', 'if', 'endif', 'elseif', 'else', 'for', 'endfor', 'while', 'endwhile', 'try', 'endtry', 'catch', 'finally', 'throw', 'return', 'break', 'continue', 'let', 'const', 'unlet', 'lockvar', 'unlockvar', 'echo', 'echon', 'echohl', 'echomsg', 'echoerr', 'execute', 'eval', 'call', 'normal', 'silent', 'redir', 'redraw', 'redrawstatus', 'sleep', 'source', 'runtime', 'finish', 'quit', 'quitall', 'wq', 'write', 'wall', 'read', 'edit', 'enew', 'find', 'sfind', 'tabfind', 'split', 'vsplit', 'new', 'vnew', 'tabnew', 'close', 'only', 'hide', 'buffer', 'bnext', 'bprev', 'bfirst', 'blast', 'badd', 'bdelete', 'bunload', 'tab', 'tabnext', 'tabprev', 'tabfirst', 'tablast', 'tabclose', 'tabonly', 'set', 'setlocal', 'setglobal', 'exists', 'has', 'type', 'len', 'empty', 'string', 'str2nr', 'str2float', 'printf', 'substitute', 'submatch', 'search', 'searchpos', 'match', 'matchadd', 'matchdelete', 'matchlist', 'matchstr', 'split', 'join', 'reverse', 'sort', 'uniq', 'filter', 'map', 'extend', 'add', 'insert', 'remove', 'count', 'index', 'max', 'min', 'abs', 'round', 'floor', 'ceil', 'line', 'col', 'virtcol', 'indent', 'lnum', 'getline', 'setline', 'append', 'cursor', 'getpos', 'setpos', 'getcurpos', 'expand', 'fnamemodify', 'resolve', 'simplify', 'pathshorten', 'glob', 'globpath', 'file_readable', 'filereadable', 'filewritable', 'isdirectory', 'delete', 'rename', 'mkdir', 'system', 'shellescape'],
     \ 'sh': ['if', 'then', 'else', 'elif', 'fi', 'case', 'esac', 'for', 'while', 'until', 'do', 'done', 'break', 'continue', 'function', 'return', 'exit', 'local', 'readonly', 'declare', 'typeset', 'export', 'unset', 'shift', 'set', 'test', 'true', 'false', 'echo', 'printf', 'read', 'exec', 'eval', 'source', 'cd', 'pwd', 'ls', 'cp', 'mv', 'rm', 'mkdir', 'rmdir', 'touch', 'find', 'grep', 'sed', 'awk', 'cut', 'sort', 'uniq', 'head', 'tail', 'cat', 'more', 'less', 'wc', 'tr', 'tee', 'xargs', 'which', 'whereis', 'type', 'alias', 'unalias', 'history', 'jobs', 'bg', 'fg', 'nohup', 'sleep', 'wait', 'kill', 'killall', 'ps', 'top', 'htop', 'df', 'du', 'free', 'mount', 'umount', 'chmod', 'chown', 'chgrp', 'su', 'sudo', 'passwd', 'id', 'whoami', 'who', 'w', 'last', 'date', 'cal', 'uptime', 'uname', 'hostname', 'ping', 'wget', 'curl', 'ssh', 'scp', 'rsync', 'tar', 'gzip', 'gunzip', 'zip', 'unzip'],
     \ 'bash': ['if', 'then', 'else', 'elif', 'fi', 'case', 'esac', 'for', 'while', 'until', 'do', 'done', 'break', 'continue', 'function', 'return', 'exit', 'local', 'readonly', 'declare', 'typeset', 'export', 'unset', 'shift', 'set', 'test', 'true', 'false', 'echo', 'printf', 'read', 'exec', 'eval', 'source', 'select', 'time', 'coproc', 'mapfile', 'readarray', 'compgen', 'complete', 'compopt', 'caller', 'command', 'builtin', 'enable', 'help', 'let', 'logout', 'popd', 'pushd', 'dirs', 'shopt', 'suspend', 'times', 'trap', 'ulimit', 'umask', 'bind', 'hash', 'getopts'],
@@ -31,13 +31,7 @@ let s:common_keywords = {
 
 let s:ignored_filetypes = ['text', 'txt', 'markdown', 'md', 'rst', 'asciidoc', 'tex', 'latex', 'log', 'conf', 'config', 'ini', 'csv', 'tsv', 'json', 'xml', 'html', 'css', 'yaml', 'yml', 'toml', 'gitcommit', 'gitrebase', 'diff', 'help', 'man', 'qf', 'netrw', 'nerdtree']
 
-let s:header_mappings = {
-    \ 'h': 'c',
-    \ 'hpp': 'cpp',
-    \ 'hxx': 'cpp',
-    \ 'hh': 'cpp',
-    \ 'H': 'cpp'
-    \ }
+let s:header_mappings = {'h': 'c', 'hpp': 'cpp', 'hxx': 'cpp', 'hh': 'cpp', 'H': 'cpp'}
 
 let s:universal_ignore = ['a', 'an', 'the', 'is', 'are', 'was', 'were', 'be', 'been', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'can', 'must', 'shall', 'to', 'of', 'in', 'on', 'at', 'by', 'for', 'with', 'from', 'up', 'out', 'off', 'over', 'under', 'again', 'further', 'then', 'once', 'here', 'there', 'when', 'where', 'why', 'how', 'all', 'any', 'both', 'each', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 's', 't', 'just', 'now']
 
@@ -53,6 +47,20 @@ function! s:ClosePopup()
         endtry
         let s:popup_id = -1
     endif
+endfunction
+
+function! s:IsInComment()
+    let synstack = synstack(line('.'), col('.'))
+    if empty(synstack)
+        return 0
+    endif
+    for syn_id in synstack
+        let syn_name = synIDattr(syn_id, 'name')
+        if syn_name =~? 'comment\|todo\|fixme\|note\|hack\|xxx'
+            return 1
+        endif
+    endfor
+    return 0
 endfunction
 
 function! s:IsIgnoredWord(word)
@@ -80,15 +88,15 @@ function! s:IsIgnoredWord(word)
         let effective_ft = s:header_mappings[extension]
     endif
     
-    if has_key(s:common_keywords, effective_ft)
-        if index(s:common_keywords[effective_ft], word_lower) >= 0
+    if has_key(s:keywords, effective_ft)
+        if index(s:keywords[effective_ft], word_lower) >= 0
             return 1
         endif
     endif
     
     if &filetype == 'make' || expand('%:t') =~? 'makefile\|\.mk$'
-        if has_key(s:common_keywords, 'make')
-            if index(s:common_keywords['make'], word_lower) >= 0
+        if has_key(s:keywords, 'make')
+            if index(s:keywords['make'], word_lower) >= 0
                 return 1
             endif
         endif
@@ -98,29 +106,13 @@ function! s:IsIgnoredWord(word)
         return 1
     endif
     
-    if a:word =~ '^\(TODO\|FIXME\|NOTE\|WARNING\)$'
+    if a:word =~ '^\(TODO\|FIXME\|NOTE\|HACK\|XXX\|BUG\|WARNING\|ERROR\|INFO\|DEBUG\)$'
         return 1
     endif
     
     if a:word =~ '^\(define\|undef\|ifdef\|ifndef\|endif\|pragma\|include\)$'
         return 1
     endif
-    
-    return 0
-endfunction
-
-function! s:IsInComment()
-    let synstack = synstack(line('.'), col('.'))
-    if empty(synstack)
-        return 0
-    endif
-    
-    for syn_id in synstack
-        let syn_name = synIDattr(syn_id, 'name')
-        if syn_name =~? 'comment\|todo\|fixme\|note\|hack\|xxx'
-            return 1
-        endif
-    endfor
     
     return 0
 endfunction
@@ -223,14 +215,15 @@ function! s:ShowReferences(word, results)
         \ }
     
     let s:popup_id = popup_create(lines, opts)
-    
-    call popup_setoptions(s:popup_id, {
-        \ 'filter': function('s:PopupFilter', [a:results])
-        \ })
+    call popup_setoptions(s:popup_id, {'filter': function('s:PopupFilter', [a:results])})
 endfunction
 
 function! s:PopupFilter(results, id, key)
-    if a:key == "\<Esc>" || a:key == 'q'
+    if mode() != 'n'
+        return 0
+    endif
+    
+    if a:key == "\<Esc>" || a:key == ';'
         call popup_close(a:id)
         return 1
     endif
