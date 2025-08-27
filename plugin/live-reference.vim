@@ -65,35 +65,35 @@ endfunction
 
 function! s:IsIgnoredWord(word)
     let word_lower = tolower(a:word)
-    
+
     if index(s:ignored_filetypes, &filetype) >= 0
         return 1
     endif
-    
+
     if a:word =~ '^\d\+$'
         return 1
     endif
-    
+
     if len(a:word) == 1 && a:word !~ '[ijklmnxyzabcdefghpqrstuv]'
         return 1
     endif
-    
+
     if index(s:universal_ignore, word_lower) >= 0
         return 1
     endif
-    
+
     let effective_ft = &filetype
     let extension = expand('%:e')
     if has_key(s:header_mappings, extension)
         let effective_ft = s:header_mappings[extension]
     endif
-    
+
     if has_key(s:keywords, effective_ft)
         if index(s:keywords[effective_ft], word_lower) >= 0
             return 1
         endif
     endif
-    
+
     if &filetype == 'make' || expand('%:t') =~? 'makefile\|\.mk$'
         if has_key(s:keywords, 'make')
             if index(s:keywords['make'], word_lower) >= 0
@@ -101,19 +101,19 @@ function! s:IsIgnoredWord(word)
             endif
         endif
     endif
-    
+
     if len(a:word) <= 4 && a:word =~ '^[A-Z]\+$'
         return 1
     endif
-    
+
     if a:word =~ '^\(TODO\|FIXME\|NOTE\|HACK\|XXX\|BUG\|WARNING\|ERROR\|INFO\|DEBUG\)$'
         return 1
     endif
-    
+
     if a:word =~ '^\(define\|undef\|ifdef\|ifndef\|endif\|pragma\|include\)$'
         return 1
     endif
-    
+
     return 0
 endfunction
 
@@ -121,15 +121,15 @@ function! s:GetWordUnderCursor()
     if s:IsInComment()
         return ''
     endif
-    
+
     let word = expand('<cword>')
     if len(word) < g:live_refs_min_word_len || word !~ '\w'
         return ''
     endif
-    
+
     let line = getline('.')
     let col = col('.') - 1
-    
+
     let word_start = match(line, '\<' . escape(word, '\/.*$^~[]') . '\>', col)
     if word_start == -1
         let word_start = match(line, '\<' . escape(word, '\/.*$^~[]') . '\>')
@@ -141,7 +141,7 @@ function! s:GetWordUnderCursor()
             let word_start = match(line, '\<' . escape(word, '\/.*$^~[]') . '\>', word_start + 1)
         endwhile
     endif
-    
+
     if word_start != -1
         let word_end = word_start + len(word) - 1
         if col < word_start || col > word_end
@@ -150,42 +150,42 @@ function! s:GetWordUnderCursor()
     else
         return ''
     endif
-    
+
     if s:IsIgnoredWord(word)
         return ''
     endif
-    
+
     return word
 endfunction
 
 function! s:FindWordOccurrences(word)
     let results = []
     let current_line = line('.')
-    
+
     let save_pos = getcurpos()
     call cursor(1, 1)
-    
+
     let search_pattern = '\<' . escape(a:word, '\/.*$^~[]') . '\>'
     let flags = 'W'
-    
+
     while 1
         let pos = searchpos(search_pattern, flags)
         if pos[0] == 0
             break
         endif
-        
+
         if pos[0] != current_line
             let line_text = getline(pos[0])
             call add(results, {'lnum': pos[0], 'text': trim(line_text)})
         endif
-        
+
         if len(results) >= g:live_refs_max_results
             break
         endif
-        
+
         let flags = 'W'
     endwhile
-    
+
     call setpos('.', save_pos)
     return results
 endfunction
@@ -194,12 +194,12 @@ function! s:ShowReferences(word, results)
     if empty(a:results)
         return
     endif
-    
+
     let lines = ['References for "' . a:word . '":']
     for result in a:results
         call add(lines, printf('%4d: %s', result.lnum, result.text))
     endfor
-    
+
     let opts = {
         \ 'line': 'cursor+1',
         \ 'col': 'cursor',
@@ -213,7 +213,7 @@ function! s:ShowReferences(word, results)
         \ 'close': 'click',
         \ 'moved': 'any'
         \ }
-    
+
     let s:popup_id = popup_create(lines, opts)
     call popup_setoptions(s:popup_id, {'filter': function('s:PopupFilter', [a:results])})
 endfunction
@@ -222,12 +222,12 @@ function! s:PopupFilter(results, id, key)
     if mode() != 'n'
         return 0
     endif
-    
+
     if a:key == "\<Esc>" || a:key == ';'
         call popup_close(a:id)
         return 1
     endif
-    
+
     if a:key =~ '^[1-9]$'
         let idx = str2nr(a:key) - 1
         if idx < len(a:results)
@@ -236,7 +236,7 @@ function! s:PopupFilter(results, id, key)
         endif
         return 1
     endif
-    
+
     return 0
 endfunction
 
@@ -244,26 +244,26 @@ function! s:UpdateReferences()
     if !g:live_refs_enabled
         return
     endif
-    
+
     let current_pos = [line('.'), col('.')]
     if current_pos == s:last_pos
         return
     endif
     let s:last_pos = current_pos
-    
+
     let word = s:GetWordUnderCursor()
-    
+
     if word != s:current_word
         call s:ClosePopup()
         let s:current_word = word
     endif
-    
+
     if empty(word)
         return
     endif
-    
+
     let results = s:FindWordOccurrences(word)
-    
+
     if !empty(results)
         call s:ShowReferences(word, results)
     endif
